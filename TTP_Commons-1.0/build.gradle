@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('TTP_Commons-1.0.jar'))

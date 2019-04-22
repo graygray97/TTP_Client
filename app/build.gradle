@@ -1,0 +1,50 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.ttp.ttp_client"
+        minSdkVersion 23
+        targetSdkVersion 28
+        multiDexEnabled true
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        release {
+            multiDexKeepFile file('multidex-config.txt')
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        repositories {
+            maven { url 'https://oss.sonatype.org/content/repositories/ksoap2-android-releases' }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
+    implementation 'com.google.android.libraries.places:places:1.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0-beta01'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.google.code.ksoap2-android:ksoap2-android:3.6.4'
+    implementation project(':TTP_Commons-1.0')
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.maps:google-maps-services:0.9.3'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+    implementation 'com.google.maps.android:android-maps-utils:0.5'
+}
