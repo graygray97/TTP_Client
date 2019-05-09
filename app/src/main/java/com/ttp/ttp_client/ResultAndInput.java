@@ -1,10 +1,10 @@
 package com.ttp.ttp_client;
 
-public class ResultAndMode {
+public class ResultAndInput {
     private String result;
     private AppTourInput tourInput;
 
-    public ResultAndMode(String res, AppTourInput input){
+    public ResultAndInput(String res, AppTourInput input){
         result = res;
         tourInput = input;
     }

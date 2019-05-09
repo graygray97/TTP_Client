@@ -1,6 +1,6 @@
 package com.ttp.ttp_client;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.model.LatLng;
 import com.ttp.ttp_commons.TourInput;
 
 import java.util.List;
@@ -23,10 +23,9 @@ public class AppTourInput {
     }
 
     public String getNameForLatLng(LatLng loc){
-        String[] locations = tourInput.getLocations();
+        LatLng[] locations = tourInput.getLocations();
         for(int i = 0; i < locations.length; i++){
-            String[] latlng = locations[i].split(",");
-            if(loc.latitude == Double.parseDouble(latlng[0]) && loc.longitude == Double.parseDouble(latlng[1])){
+            if(loc == locations[i]){
                 return tourNames.get(i);
             }
         }

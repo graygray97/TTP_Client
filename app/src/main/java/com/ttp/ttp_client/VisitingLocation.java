@@ -2,6 +2,7 @@ package com.ttp.ttp_client;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,6 +54,7 @@ public class VisitingLocation extends AppCompatActivity {
         startLoc = gson.fromJson(intent.getStringExtra(StartLocation.StartingLocation), InputLocation.class);
 
         recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.addItemDecoration(new RVDivider(this));
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rvAdapter = new Adapter(locations);
         recyclerView.setAdapter(rvAdapter);
@@ -100,7 +102,6 @@ public class VisitingLocation extends AppCompatActivity {
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
         autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
-
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
@@ -109,7 +110,7 @@ public class VisitingLocation extends AppCompatActivity {
 
             @Override
             public void onError(Status status) {
-                Toast.makeText(getApplicationContext(), "An error occurred: " + status, Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "An error occurred: " + status, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -134,15 +135,18 @@ public class VisitingLocation extends AppCompatActivity {
     public void addLoc(View view){
         try {
             if(current != null) {
-                if(locations.size() < getResources().getInteger(R.integer.max_Visit)) {
-                    locations.add(current);
-                    rvAdapter.notifyItemInserted(locations.size() - 1);
+                if(!locations.contains(current) && !current.getLatLng().equals(startLoc.getLatLng())) {
+                    if (locations.size() < getResources().getInteger(R.integer.max_Visit)) {
+                        locations.add(current);
+                        rvAdapter.notifyItemInserted(locations.size() - 1);
+                        current = null;
+                    } else {
+                        Toast.makeText(getApplicationContext(), "The max amount of locations has been added", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(),"That location has already been added", Toast.LENGTH_LONG).show();
                 }
-                else{
-                    Toast.makeText(getApplicationContext(), "The max amount of locations has been added", Toast.LENGTH_SHORT).show();
-                }
-            }
-            else{
+            } else{
                 Toast.makeText(getApplicationContext(), "The field is empty",
                         Toast.LENGTH_SHORT).show();
             }

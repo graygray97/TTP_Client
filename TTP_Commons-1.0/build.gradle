@@ -1,2 +1,3 @@
 configurations.maybeCreate("default")
 artifacts.add("default", file('TTP_Commons-1.0.jar'))
+//artifacts.add("default",file('D:\\Documents\\FinalYearProject\\TTP_Commons\\target\\TTP_Commons-1.0.jar'));

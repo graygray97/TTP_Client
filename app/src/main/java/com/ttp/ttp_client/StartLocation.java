@@ -66,7 +66,6 @@ public class StartLocation extends AppCompatActivity {
                     getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
             autocompleteFragment.setText(place.getLocation());
         } catch(Exception e) {
-
         }
     }
 
@@ -82,8 +81,7 @@ public class StartLocation extends AppCompatActivity {
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                InputLocation loc = new InputLocation(place.getName(), place.getLatLng());
-                startLoc = gson.toJson(loc);
+                startLoc = gson.toJson(new InputLocation(place.getName(), place.getLatLng()));
             }
             @Override
             public void onError(Status status) {
@@ -100,7 +98,7 @@ public class StartLocation extends AppCompatActivity {
         }
         else
         {
-            Toast.makeText(getApplicationContext(), "The field is empty",
+            Toast.makeText(getApplicationContext(), "Error: A starting location is needed",
                     Toast.LENGTH_SHORT).show();
         }
     }

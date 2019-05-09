@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">TTP_Client</string>
+    <string name="app_name">TTP SEARCH</string>
     <string name="google_map_api_key">AIzaSyADAKoMEDAV7NwnBkuVT3-oZ-nfXAFUAJY</string>
     <string name="start_loc_error">PLEASE SELECT A LOCATION</string>
     <string name="TravelMode_Walk">WALKING</string>
     <string name="TravelMode_Cycle">CYCLING</string>
     <string name="TravelMode_Drive">DRIVING</string>
     <string name="TravelMode_Transit">Transit</string>
-    <string name="wsdl_url">http://f388df81.ngrok.io/TourCreation/TourCreation?WSDL</string>
+    <string name="wsdl_url">/TourCreation/TourCreation?WSDL</string>
     <string name="name_space">http://ttp_webservice.me.org/</string>
     <string name="createTour_method">createTour</string>
     <string name="getFullPath_method">getFullPath</string>

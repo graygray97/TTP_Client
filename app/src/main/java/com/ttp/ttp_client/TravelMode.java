@@ -15,10 +15,12 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.maps.model.LatLng;
 import com.ttp.ttp_commons.TourInput;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TravelMode extends AppCompatActivity implements View.OnClickListener {
@@ -26,6 +28,7 @@ public class TravelMode extends AppCompatActivity implements View.OnClickListene
     private List<InputLocation> locations = new ArrayList<>();
     public static final String TravelMode = "com.ttp.ttp_client.TravelMode";
     public static final String travelModeKey = "com.ttp.ttp_client.TravelMode.Key";
+    public static final String travelModeLocationsKey = "com.ttp.ttp_client.TravelMode.LocationsKey";
 
     int[] buttonsIds = {R.id.button_walk,R.id.button_cycle,R.id.button_drive, R.id.button_transit};
     Button[] buttons = new Button[buttonsIds.length];
@@ -53,14 +56,22 @@ public class TravelMode extends AppCompatActivity implements View.OnClickListene
     @Override
     protected void onStart() {
         super.onStart();
+        SharedPreferences settings = getSharedPreferences(TravelMode, 0);
         if(locations == null) {
-            SharedPreferences settings = getSharedPreferences(TravelMode, 0);
+
             Type collectionType = TypeToken.getParameterized(List.class, InputLocation.class).getType();
-            String locJson = settings.getString(travelModeKey, "");
+            String locJson = settings.getString(travelModeLocationsKey, "");
             try {
                 locations = gson.fromJson(locJson, collectionType);
             } catch (Exception e) {
             }
+        }
+        try {
+            int focusInt = settings.getInt(travelModeKey, 0);
+            if(focusInt != 0) {
+                setFocus(focus, buttons[focusInt]);
+            }
+        } catch (Exception e){
         }
     }
 
@@ -72,7 +83,8 @@ public class TravelMode extends AppCompatActivity implements View.OnClickListene
         SharedPreferences.Editor editor = settings.edit();
 
         editor.clear();
-        editor.putString(travelModeKey, gson.toJson(locations));
+        editor.putString(travelModeLocationsKey, gson.toJson(locations));
+        editor.putInt(travelModeKey, Arrays.asList(buttons).indexOf(focus));
         editor.commit();
     }
 
@@ -81,27 +93,27 @@ public class TravelMode extends AppCompatActivity implements View.OnClickListene
     }
 
     private void setFocus(Button btn_unfocus, Button btn_focus){
-        btn_unfocus.setTextColor(Color.rgb(50,50,50));
-        btn_focus.setTextColor(Color.rgb(3, 106, 150));
+        btn_unfocus.setBackgroundColor(getColor(R.color.colorSecondaryVariant));
+        btn_focus.setBackgroundColor(getColor(R.color.colorSecondary));
         this.focus = btn_focus;
     }
 
     private void setFocus(Button focus){
-        focus.setTextColor(Color.rgb(3, 106, 150));
+        focus.setBackgroundColor(getColor(R.color.colorSecondary));
         this.focus = focus;
     }
 
     public void getResults(View view)
     {
         Intent intent = new Intent(this, TourResults.class);
-        List<String> locs = new ArrayList<>();
+        List<LatLng> locs = new ArrayList<>();
         List<String> locsNames = new ArrayList<>();
         try{
             for(InputLocation loc : locations){
-                locs.add(String.valueOf(loc.getLatLng().latitude)+","+String.valueOf(loc.getLatLng().longitude));
+                locs.add(new LatLng(loc.getLatLng().latitude, loc.getLatLng().longitude));
                 locsNames.add(loc.getLocation());
             }
-            AppTourInput input = new AppTourInput(new TourInput(focus.getText().toString(), locs.toArray(new String[0])), locsNames);
+            AppTourInput input = new AppTourInput(new TourInput(focus.getText().toString(), locs.toArray(new LatLng[0])), locsNames);
             intent.putExtra(TravelMode, gson.toJson(input));
             startActivity(intent);
         } catch(Exception e){

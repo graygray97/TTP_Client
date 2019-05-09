@@ -12,17 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
-        <activity android:name=".SavedResults"
-            android:parentActivityName=".HomePage">
-        </activity>
         <activity android:name=".TourResults"
             android:parentActivityName=".TravelMode"></activity>
         <activity android:name=".TravelMode"
             android:parentActivityName=".VisitingLocation"></activity>
         <activity android:name=".VisitingLocation"
-            android:parentActivityName=".StartLocation"/>
+            android:windowSoftInputMode="adjustPan"
+            android:parentActivityName=".StartLocation"></activity>
         <activity android:name=".StartLocation"
-            android:parentActivityName=".HomePage"/>
+            android:parentActivityName=".HomePage"
+            android:windowSoftInputMode="adjustPan"></activity>
         <activity android:name=".HomePage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,5 +1,7 @@
 package com.ttp.ttp_client;
 
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.support.v4.app.INotificationSideChannel;
 import android.text.Layout;
 import android.view.LayoutInflater;
@@ -29,7 +31,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.myViewHolder> {
         return new myViewHolder(itemView);
     }
 
-    public class myViewHolder extends RecyclerView.ViewHolder {
+    public class myViewHolder extends RecyclerView.ViewHolder{
         TextView itemTextView;
         Button delButton;
 

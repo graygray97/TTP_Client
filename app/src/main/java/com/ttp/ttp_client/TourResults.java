@@ -1,13 +1,13 @@
 package com.ttp.ttp_client;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +48,8 @@ public class TourResults extends AppCompatActivity {
     Gson gson = new Gson();
     String input;
     TextView textView;
+    String url;
+    List<Polyline> polylines = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,19 +63,21 @@ public class TourResults extends AppCompatActivity {
         textView = findViewById(R.id.textViewResults);
         textView.setMovementMethod(new ScrollingMovementMethod());
         createTour task = new createTour();
+        SharedPreferences settings = getSharedPreferences(HomePage.HomePage, 0);
+        url = settings.getString(HomePage.homePageKey, "");
         task.execute(input);
     }
 
-    private class createTour extends AsyncTask<String, Void, ResultAndMode> {
+    private class createTour extends AsyncTask<String, Void, ResultAndInput> {
         @Override
-        protected ResultAndMode doInBackground(String... input) {
+        protected ResultAndInput doInBackground(String... input) {
             AppTourInput inputObject = gson.fromJson(input[0], AppTourInput.class);
             SoapObject request = new SoapObject(getString(R.string.name_space),getString(R.string.createTour_method));
             request.addProperty("modeAndLocations", gson.toJson(inputObject.getTourInput()));
             SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
             envelope.setOutputSoapObject(request);
-            HttpTransportSE androidHttpTransport = new HttpTransportSE(getString(R.string.wsdl_url));
-            String calcRes = "Error: Nothing";
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(url + getString(R.string.wsdl_url));
+            String calcRes = "Error: no known error";
             try {
                 androidHttpTransport.call(getString(R.string.createTour_method), envelope);
                 if (envelope.bodyIn instanceof SoapFault) {
@@ -83,12 +87,12 @@ public class TourResults extends AppCompatActivity {
                     calcRes = obj.getProperty(0).toString();
                 }
             }catch(Exception ex) {
-                calcRes = "Error1" + ex.getMessage();
+                calcRes = "Error:" + ex.getMessage();
             }
-            return new ResultAndMode(calcRes, inputObject);
+            return new ResultAndInput(calcRes, inputObject);
         }
 
-        protected void onPostExecute(ResultAndMode result) {
+        protected void onPostExecute(ResultAndInput result) {
             try {
                 Type collectionType = TypeToken.getParameterized(List.class, Path.class).getType();
                 List<Path> output = gson.fromJson(result.getResult(), collectionType);
@@ -100,20 +104,31 @@ public class TourResults extends AppCompatActivity {
                             LatLng latLng = new LatLng(path.getFrom().getLat(), path.getFrom().getLng());
                             if (path.getFrom().isStartingLoc()) {
                                 googleMap.addMarker(new MarkerOptions().position(latLng).title("Start")).showInfoWindow();
-                                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+                                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
                             } else {
                                 googleMap.addMarker(new MarkerOptions().position(latLng));
                             }
                             getFullPath task = new getFullPath();
-                            String from = path.getFrom().getLat() + "," + path.getFrom().getLng();
-                            String to = path.getTo().getLat() + "," + path.getTo().getLng();
-                            TourInput input = new TourInput(result.getTourInput().getTourInput().getMode(), new String[]{from,to});
+                            com.google.maps.model.LatLng[] fromTo = new com.google.maps.model.LatLng[]{path.getFrom().getLocation(),path.getTo().getLocation()};
+                            TourInput input = new TourInput(result.getTourInput().getTourInput().getMode(), fromTo);
                             task.execute(gson.toJson(input));
                         }
+                        googleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+                            @Override
+                            public void onPolylineClick(Polyline polyline) {
+                                for(Polyline p : polylines){
+                                    p.setZIndex(0);
+                                    p.setColor(getColor(R.color.colorSecondaryVariant));
+                                }
+                                polyline.setZIndex(1);
+                                polyline.setColor(getColor(R.color.colorSecondary));
+                                textView.setText(polyline.getTag().toString());
+                            }
+                        });
                     }
                 });
             } catch(Exception e) {
-                Toast.makeText(getApplicationContext(), "Error2: " + result,  Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Error: Tour could not be found",  Toast.LENGTH_LONG).show();
             }
         }
 
@@ -134,7 +149,7 @@ public class TourResults extends AppCompatActivity {
             request.addProperty("pathParams", pathParams[0]);
             SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
             envelope.setOutputSoapObject(request);
-            HttpTransportSE androidHttpTransport = new HttpTransportSE(getString(R.string.wsdl_url));
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(url + getString(R.string.wsdl_url));
             String calcRes;
             try {
                 androidHttpTransport.call(getString(R.string.getFullPath_action), envelope);
@@ -161,29 +176,22 @@ public class TourResults extends AppCompatActivity {
                 mapFragment.getMapAsync(new OnMapReadyCallback() {
                     @Override
                     public void onMapReady(GoogleMap googleMap) {
-                        Random rnd = new Random();
-                        List<Polyline> polylines = new ArrayList<>();
                         PolylineOptions polylineOptions = new PolylineOptions()
-                                .color(Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)))
+                                .color(getColor(R.color.colorSecondaryVariant))
                                 .clickable(true);
                         Polyline polyline = googleMap.addPolyline(polylineOptions.addAll(decPath));
                         polyline.setTag(buildRouteDesc(direc));
                         polylines.add(polyline);
-                        googleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
-                            @Override
-                            public void onPolylineClick(Polyline polyline) {
-                                for(Polyline pl : polylines){
-                                    pl.setZIndex(0);
-                                }
-                                polyline.setZIndex(1);
-                                textView.setText(polyline.getTag().toString());
-                            }
-                        });
                     }
                 });
             } catch(Exception e) {
-                Toast.makeText(getApplicationContext(), "Error3: " + result,
+                if(result.startsWith("Error")){
+                    Toast.makeText(getApplicationContext(), result,
                         Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Error: Tour could not be found",
+                        Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
